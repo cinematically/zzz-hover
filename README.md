@@ -16,4 +16,4 @@ This mod introduces advanced helicopter piloting features to enhance your gaming
 
 For support or inquiries, join our [https://discord.gg/usWtmxacsf](#)!
 
-Feel free to explore the code and contribute to this project! If you encounter any issues or have suggestions, please open an issue. Enjoy flying with the zzz-hover!
+Feel free to explore the code and contribute to this project! If you encounter any issues or have suggestions, please open an issue. Enjoy flying with the ease of zzz-hover!
