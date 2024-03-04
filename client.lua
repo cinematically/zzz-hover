@@ -3,7 +3,7 @@ local isHovering, hoverPosition, currentHelicopter, keyPressedTime = false, nil,
 local Config = {
     HoverHeightAdjustment = 5.0,
     Debug = true,
-    NotificationSystem = 'standalone', -- options currently are ox_lib or standalone.
+    NotificationSystem = 'standalone', -- options are ox_lib or standalone
     AllowJumpOutOfHelicopter = true
 }
 
@@ -27,18 +27,17 @@ function DrawTxt(x, y, width, height, scale, text, r, g, b, a)
     DrawText(x - width / 2, y - height / 2 + 0.005)
 end
 
-local showHoverStatus = false
-local hoverStatusMessage = ""
-
 local function SendNotification(title, description, type)
     if Config.NotificationSystem == 'ox_lib' then
         exports['ox_lib']:notify({title = title, description = description, type = type})
     elseif Config.NotificationSystem == 'standalone' then
-        showHoverStatus = true
         hoverStatusMessage = title .. ": " .. description
-        Citizen.SetTimeout(5000, function() showHoverStatus = false end)
+        showHoverStatus = true
+        Citizen.SetTimeout(5000, function()
+            showHoverStatus = false
+        end)
     else
-        print("No valid notification system configured.")
+        Debug("No valid notification system configured.")
     end
 end
 
@@ -66,8 +65,7 @@ local function ToggleHoverMode()
         isHovering = not isHovering
         hoverPosition = isHovering and GetEntityCoords(currentHelicopter) or nil
         FreezeEntityPosition(currentHelicopter, isHovering)
-        hoverStatusMessage = isHovering and "Engaged" or "Disengaged"
-        showHoverStatus = true
+        SendNotification('Hover Mode', isHovering and 'Engaged' or 'Disengaged', isHovering and 'success' or 'error')
     else
         if not IsPedInAnyHeli(playerPed) then
             Debug("You need to be in a helicopter.")
@@ -87,10 +85,12 @@ Citizen.CreateThread(function()
             elseif keyPressedTime and (GetGameTimer() - keyPressedTime) > 2000 then
                 ToggleHoverMode()
                 keyPressedTime = nil
-            end            
+            end
+            
             if showHoverStatus then
-                DrawTxt(0.5, 0.5, 1.0, 1.0, 0.5, "Hover Mode: " .. hoverStatusMessage, 255, 255, 255, 255)
-            end            
+                DrawTxt(0.5, 0.5, 1.0, 1.0, 0.5, hoverStatusMessage, 255, 255, 255, 255)
+            end
+
             if isHovering then
                 if IsControlJustPressed(0, 172) then
                     AdjustHoverHeight(true)
@@ -99,8 +99,6 @@ Citizen.CreateThread(function()
                 end
                 SetEntityCoordsNoOffset(currentHelicopter, hoverPosition.x, hoverPosition.y, hoverPosition.z, true, true, true)
             end
-        else
-            showHoverStatus = false
         end
     end
 end)
